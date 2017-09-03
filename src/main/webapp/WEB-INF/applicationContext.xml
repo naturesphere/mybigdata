@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!--分散配置-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!--组件扫描-->
+    <context:component-scan base-package="com.it18zhang.mybigdata.dao.Impl,com.it18zhang.mybigdata.service.Impl"/>
+    <!--数据源-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverclass}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxPoolSize" value="${c3p0.pool.size.max}"/>
+        <property name="minPoolSize" value="${c3p0.pool.size.min}"/>
+        <property name="initialPoolSize" value="${c3p0.pool.size.ini}"/>
+        <property name="acquireIncrement" value="${c3p0.pool.size.increment}"/>
+    </bean>
+    <!--本地会话工厂bean,spring整合hibernate-->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <!--配置数据源-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--higernate属性-->
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+            </props>
+        </property>
+        <property name="mappingDirectoryLocations">
+            <list>
+                <value>classpath:mapper</value>
+            </list>
+        </property>
+    </bean>
+    <!--配置事物管理器-->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <!--使用注解来控制事物-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>
